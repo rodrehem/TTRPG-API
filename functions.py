@@ -1,6 +1,5 @@
 import random
 import re
-import sys
 
 def roll_dice(roll_quantity: int, face_count: int, modifier: int):
 

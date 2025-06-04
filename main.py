@@ -1,5 +1,5 @@
 from typing import Annotated
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, File, HTTPException, Depends, UploadFile
 from pydantic import BaseModel
 from database import engine, SessionLocal
 from sqlalchemy.orm import Session
@@ -31,6 +31,14 @@ def get_db():
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
+@app.post("/api/upimage")
+async def upload_images(file: UploadFile = File()) -> str:
+    result = functions.upload_file(file, file.filename)
+    if not result: 
+        raise HTTPException(status_code=404, detail='NOT_FOUND')
+    else: 
+        return result
+
 @app.post("/api/characters")
 async def create_characters(character: CharacterBase, db: db_dependency):
     db_character = models.Character(name=character.name, 
@@ -42,7 +50,9 @@ async def create_characters(character: CharacterBase, db: db_dependency):
                                     charisma=character.charisma,
                                     agility=character.agility,
                                     lifePoints=character.lifePoints,
-                                    energyPoints=character.energyPoints)
+                                    energyPoints=character.energyPoints,
+                                    image=character.image)
+    
     db.add(db_character)
     db.commit()
     db.refresh(db_character)
@@ -53,7 +63,8 @@ async def search_characters(db: db_dependency, char_id: int | None = None):
         result = db.get(models.Character, char_id)
         if not result:
             raise HTTPException(status_code=404, detail='NOT_FOUND')
-        return result
+        else:
+            return result
     else: 
         result = db.query(models.Character).all()
         return result
@@ -65,4 +76,3 @@ async def roll_dice(roll_quantity: int = 1, face_count: int = 6, advantage: int 
     else:
         result = functions.roll_dice(roll_quantity, face_count, advantage)
         return result
-

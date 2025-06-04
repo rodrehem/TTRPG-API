@@ -15,4 +15,5 @@ class Character(Base):
     agility = Column(Integer, index = True, nullable= False)
     lifePoints = Column(Integer, index = True, nullable= False)
     energyPoints = Column(Integer, index = True, nullable= False)
+    image = Column(String, index = True, nullable= True)
     

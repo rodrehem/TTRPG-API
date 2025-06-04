@@ -1,5 +1,8 @@
 import random
 import re
+from s3confing import AWS_REGION, s3_client, S3_BUCKET_NAME
+from urllib.parse import quote_plus
+
 
 def roll_dice(roll_quantity: int, face_count: int, modifier: int):
 
@@ -74,3 +77,21 @@ def roll_requisition(str: str) -> str:
 
     if len(resultado[0]) > 2000: return f'Resultados ultrapassam 2000 caracteres\nTotal: {resultado[1]}'
     else: return resultado[0]
+
+#------------------------------------------------------------------------------------------------------
+
+def upload_file(file, file_name = None):
+    try:
+        safe_file_name = quote_plus(file_name)
+        
+        file_content_type = file.content_type
+        extra_args = {
+            'ContentType': file_content_type,
+            'ContentDisposition': 'inline'
+        }
+
+        s3_client.upload_fileobj(file.file, S3_BUCKET_NAME, file_name, ExtraArgs = extra_args)
+        object_url = f"https://{S3_BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com/{safe_file_name}"
+        return object_url
+    except Exception as e:
+        return None

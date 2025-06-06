@@ -1,5 +1,6 @@
 from typing import Annotated
 from fastapi import FastAPI, File, HTTPException, Depends, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from database import engine, SessionLocal
 from sqlalchemy.orm import Session
@@ -8,6 +9,17 @@ import functions
 
 app = FastAPI()
 models.Base.metadata.create_all(bind=engine)
+
+origins = [
+    "http://localhost:5173"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_methods=["*"],
+    allow_headers=["*"]
+    )
 
 class CharacterBase(BaseModel):
     name: str
